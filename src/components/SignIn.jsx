@@ -1,8 +1,12 @@
-﻿import { View, TextInput, Pressable, StyleSheet } from 'react-native';
+﻿import { useState } from 'react';
+import { View, TextInput, Pressable, StyleSheet } from 'react-native';
 import { useFormik } from 'formik';
+import { useNavigate } from 'react-router-native';
 import * as yup from 'yup';
+
 import Text from './Text';
 import theme from '../theme';
+import useSignIn from '../hooks/useSignIn';
 
 const styles = StyleSheet.create({
   container: {
@@ -42,19 +46,34 @@ const validationSchema = yup.object().shape({
 });
 
 const SignIn = () => {
+  const [signIn, result] = useSignIn();
+  const navigate = useNavigate();
+  const [serverError, setServerError] = useState('');
+
   const formik = useFormik({
     initialValues: {
       username: '',
       password: '',
     },
     validationSchema,
-    onSubmit: (values) => {
-      console.log(values);
+    onSubmit: async (values) => {
+      setServerError('');
+
+      try {
+        await signIn(values);
+        console.log('Sign in successful');
+        navigate('/', { replace: true });
+      } catch (error) {
+        setServerError(error.message || 'Sign in failed');
+      }
     },
   });
 
-  const usernameError = formik.touched.username && formik.errors.username;
-  const passwordError = formik.touched.password && formik.errors.password;
+  const usernameError =
+    formik.touched.username && formik.errors.username;
+
+  const passwordError =
+    formik.touched.password && formik.errors.password;
 
   return (
     <View style={styles.container}>
@@ -84,9 +103,17 @@ const SignIn = () => {
         <Text style={styles.error}>{formik.errors.password}</Text>
       )}
 
-      <Pressable style={styles.button} onPress={formik.handleSubmit}>
+      {serverError ? (
+        <Text style={styles.error}>{serverError}</Text>
+      ) : null}
+
+      <Pressable
+        style={styles.button}
+        onPress={formik.handleSubmit}
+        disabled={result.loading}
+      >
         <Text fontWeight="bold" style={styles.buttonText}>
-          Sign in
+          {result.loading ? 'Signing in...' : 'Sign in'}
         </Text>
       </Pressable>
     </View>

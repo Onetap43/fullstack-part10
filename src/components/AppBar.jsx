@@ -1,79 +1,71 @@
-﻿import { View, ScrollView, Pressable, StyleSheet } from 'react-native';
+﻿import { ScrollView, Pressable, StyleSheet } from 'react-native';
 import { Link, useNavigate } from 'react-router-native';
 import { useQuery, useApolloClient } from '@apollo/client/react';
-import Constants from 'expo-constants';
 
-import Text from './Text';
-import theme from '../theme';
 import { GET_ME } from '../graphql/queries';
 import useAuthStorage from '../hooks/useAuthStorage';
+import Text from './Text';
 
 const styles = StyleSheet.create({
   container: {
-    paddingTop: Constants.statusBarHeight,
-    backgroundColor: theme.colors.appBar,
-  },
-  tabs: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    backgroundColor: '#24292e',
+    paddingVertical: 16,
     paddingHorizontal: 12,
   },
   tab: {
-    paddingVertical: 18,
-    paddingHorizontal: 12,
-  },
-  text: {
+    marginHorizontal: 12,
     color: '#fff',
   },
 });
 
 const AppBar = () => {
-  const { data } = useQuery(GET_ME, {
-    fetchPolicy: 'cache-and-network',
-  });
-
-  const apolloClient = useApolloClient();
+  const { data } = useQuery(GET_ME, { fetchPolicy: 'cache-and-network' });
   const authStorage = useAuthStorage();
+  const apolloClient = useApolloClient();
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
-    try {
-      await authStorage.removeAccessToken();
-      await apolloClient.resetStore();
-      navigate('/', { replace: true });
-    } catch (error) {
-      console.log('Sign out failed:', error.message);
-    }
+    await authStorage.removeAccessToken();
+    await apolloClient.resetStore();
+    navigate('/', { replace: true });
   };
 
   return (
-    <View style={styles.container}>
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.tabs}
-      >
-        <Link to="/" style={styles.tab}>
-          <Text fontWeight="bold" style={styles.text}>
-            Repositories
-          </Text>
-        </Link>
+    <ScrollView
+      horizontal
+      style={styles.container}
+      showsHorizontalScrollIndicator={false}
+    >
+      <Link to="/">
+        <Text fontWeight="bold" style={styles.tab}>Repositories</Text>
+      </Link>
 
-        {data?.me ? (
-          <Pressable style={styles.tab} onPress={handleSignOut}>
-            <Text fontWeight="bold" style={styles.text}>
-              Sign out
-            </Text>
-          </Pressable>
-        ) : (
-          <Link to="/signin" style={styles.tab}>
-            <Text fontWeight="bold" style={styles.text}>
-              Sign in
-            </Text>
+      {data?.me ? (
+        <>
+          <Link to="/review">
+            <Text fontWeight="bold" style={styles.tab}>Create a review</Text>
           </Link>
-        )}
-      </ScrollView>
-    </View>
+
+          <Link to="/myreviews">
+            <Text fontWeight="bold" style={styles.tab}>My reviews</Text>
+          </Link>
+
+          <Pressable onPress={handleSignOut}>
+            <Text fontWeight="bold" style={styles.tab}>Sign out</Text>
+          </Pressable>
+        </>
+      ) : (
+        <>
+          <Link to="/signin">
+            <Text fontWeight="bold" style={styles.tab}>Sign in</Text>
+          </Link>
+
+          <Link to="/signup">
+            <Text fontWeight="bold" style={styles.tab}>Sign up</Text>
+          </Link>
+        </>
+      )}
+    </ScrollView>
   );
 };
 

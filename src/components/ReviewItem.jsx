@@ -35,9 +35,7 @@ const styles = StyleSheet.create({
 const formatDate = (value) => {
   const date = new Date(value);
 
-  if (Number.isNaN(date.getTime())) {
-    return '';
-  }
+  if (Number.isNaN(date.getTime())) return '';
 
   return date.toLocaleDateString('en-GB', {
     day: '2-digit',
@@ -46,7 +44,7 @@ const formatDate = (value) => {
   });
 };
 
-const ReviewItem = ({ review }) => (
+const ReviewItem = ({ review, title }) => (
   <View style={styles.container}>
     <View style={styles.rating}>
       <Text fontWeight="bold" style={styles.ratingText}>
@@ -56,7 +54,7 @@ const ReviewItem = ({ review }) => (
 
     <View style={styles.content}>
       <Text fontWeight="bold" fontSize="subheading">
-        {review.user.username}
+        {title || review.user?.username || 'Review'}
       </Text>
 
       <Text color="textSecondary" style={styles.date}>

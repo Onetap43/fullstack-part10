@@ -1,4 +1,6 @@
-﻿import { FlatList, View, StyleSheet, ActivityIndicator } from 'react-native';
+﻿import { FlatList, View, Pressable, StyleSheet, ActivityIndicator } from 'react-native';
+import { useNavigate } from 'react-router-native';
+
 import RepositoryItem from './RepositoryItem';
 import Text from './Text';
 import useRepositories from '../hooks/useRepositories';
@@ -14,7 +16,7 @@ const styles = StyleSheet.create({
 
 const ItemSeparator = () => <View style={styles.separator} />;
 
-export const RepositoryListContainer = ({ repositories }) => {
+export const RepositoryListContainer = ({ repositories, onRepositoryPress }) => {
   const repositoryNodes = repositories
     ? repositories.edges.map((edge) => edge.node)
     : [];
@@ -23,7 +25,11 @@ export const RepositoryListContainer = ({ repositories }) => {
     <FlatList
       data={repositoryNodes}
       keyExtractor={(item) => item.id}
-      renderItem={({ item }) => <RepositoryItem item={item} />}
+      renderItem={({ item }) => (
+        <Pressable onPress={() => onRepositoryPress?.(item.id)}>
+          <RepositoryItem item={item} />
+        </Pressable>
+      )}
       ItemSeparatorComponent={ItemSeparator}
     />
   );
@@ -31,6 +37,7 @@ export const RepositoryListContainer = ({ repositories }) => {
 
 const RepositoryList = () => {
   const { repositories, loading, error } = useRepositories();
+  const navigate = useNavigate();
 
   if (error) {
     return <Text style={styles.message}>Error: {error.message}</Text>;
@@ -40,7 +47,16 @@ const RepositoryList = () => {
     return <ActivityIndicator size="large" style={styles.message} />;
   }
 
-  return <RepositoryListContainer repositories={repositories} />;
+  const handleRepositoryPress = (id) => {
+    navigate(`/repository/${encodeURIComponent(id)}`);
+  };
+
+  return (
+    <RepositoryListContainer
+      repositories={repositories}
+      onRepositoryPress={handleRepositoryPress}
+    />
+  );
 };
 
 export default RepositoryList;

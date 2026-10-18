@@ -1,4 +1,4 @@
-﻿import { Image, View, StyleSheet } from 'react-native';
+﻿import { Image, View, Pressable, Linking, StyleSheet } from 'react-native';
 import Text from './Text';
 import theme from '../theme';
 
@@ -43,6 +43,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flex: 1,
   },
+  githubButton: {
+    backgroundColor: theme.colors.primary,
+    padding: 14,
+    borderRadius: 4,
+    alignItems: 'center',
+    marginTop: 18,
+  },
+  githubText: {
+    color: '#fff',
+  },
 });
 
 const formatCount = (count) =>
@@ -57,38 +67,47 @@ const Stat = ({ value, label }) => (
   </View>
 );
 
-const RepositoryItem = ({ item }) => {
-  return (
-    <View style={styles.container} testID="repositoryItem">
-      <View style={styles.top}>
-        <Image
-          source={{ uri: item.ownerAvatarUrl }}
-          style={styles.avatar}
-        />
+const RepositoryItem = ({ item, showGitHubButton = false }) => (
+  <View style={styles.container} testID="repositoryItem">
+    <View style={styles.top}>
+      <Image
+        source={{ uri: item.ownerAvatarUrl }}
+        style={styles.avatar}
+      />
 
-        <View style={styles.details}>
-          <Text fontWeight="bold" fontSize="subheading">
-            {item.fullName}
-          </Text>
+      <View style={styles.details}>
+        <Text fontWeight="bold" fontSize="subheading">
+          {item.fullName}
+        </Text>
 
-          <Text color="textSecondary" style={styles.description}>
-            {item.description}
-          </Text>
+        <Text color="textSecondary" style={styles.description}>
+          {item.description}
+        </Text>
 
-          <View style={styles.language}>
-            <Text style={styles.languageText}>{item.language}</Text>
-          </View>
+        <View style={styles.language}>
+          <Text style={styles.languageText}>{item.language}</Text>
         </View>
       </View>
-
-      <View style={styles.stats}>
-        <Stat value={item.stargazersCount} label="Stars" />
-        <Stat value={item.forksCount} label="Forks" />
-        <Stat value={item.reviewCount} label="Reviews" />
-        <Stat value={item.ratingAverage} label="Rating" />
-      </View>
     </View>
-  );
-};
+
+    <View style={styles.stats}>
+      <Stat value={item.stargazersCount} label="Stars" />
+      <Stat value={item.forksCount} label="Forks" />
+      <Stat value={item.reviewCount} label="Reviews" />
+      <Stat value={item.ratingAverage} label="Rating" />
+    </View>
+
+    {showGitHubButton && item.url && (
+      <Pressable
+        style={styles.githubButton}
+        onPress={() => Linking.openURL(item.url)}
+      >
+        <Text fontWeight="bold" style={styles.githubText}>
+          Open in GitHub
+        </Text>
+      </Pressable>
+    )}
+  </View>
+);
 
 export default RepositoryItem;
